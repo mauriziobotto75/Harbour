@@ -106,7 +106,19 @@ RETURN
       @ 6, 2 SAY "Errore nella creazione del file CSV!"
       InKey(2); RETURN
    ENDIF
-   
+         cRiga := AllTrim(Str(ID_NOLEG)) + ";" + ;
+               '"' + cNomeCliente + '"' + ";" + ;
+               '"' + cNomeBici + '"' + ";" + ;
+               DToC(D_INIZIO) + ";" + ;
+               O_INIZIO + ";" + ;
+               Transform(CAUZIONE, "999.00") + ";" + ; // <-- Aggiunto nel CSV
+               Transform(ANTICIPO, "999.00") + ";" + ; // <-- Aggiunto nel CSV
+               IF(Empty(D_FINE), "", DToC(D_FINE)) + ";" + ;
+               O_FINE + ";" + ;
+               StrTran(Str(TOTALE, 7, 2), ".", ",") + ";" + ;
+               StrTran(Str(SALDO, 7, 2), ".", ",") + ;  // <-- Aggiunto nel CSV
+               Chr(13) + Chr(10)
+
    // Scrittura della riga di intestazione (Header)
    cRiga := "ID_NOLEGGIO;CLIENTE;MODELLO_BICI;DATA_INIZIO;ORA_INIZIO;DATA_FINE;ORA_FINE;TOTALE_EUR" + Chr(13) + Chr(10)
    FWrite(nHandle, cRiga)
