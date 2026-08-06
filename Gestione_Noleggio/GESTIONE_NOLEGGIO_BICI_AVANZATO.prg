@@ -11,21 +11,21 @@ PROCEDURE Main()
   PROCEDURE InizializzaDatabase()
    LOCAL aBici, aClie, aNole
    
-   // 1. ARCHIVIO BICICLETTE
-   IF !File("biciclette.dbf")
-      aBici := { {"ID_BICI",  "N",  4, 0}, ;
-                 {"MODELLO",  "C", 30, 0}, ;
-                 {"STATO",    "C",  1, 0}, ;
-                 {"TARIFFA",  "N",  6, 2} }
-      DbCreate("biciclette.dbf", aBici)
+    IF !File("noleggi.dbf")
+      aNole := { {"ID_NOLEG", "N",  6, 0}, ;
+                 {"ID_BICI",  "N",  4, 0}, ;
+                 {"ID_CLIE",  "N",  4, 0}, ;
+                 {"D_INIZIO", "D",  8, 0}, ;
+                 {"O_INIZIO", "C",  8, 0}, ;
+                 {"CAUZIONE", "N",  6, 2}, ; // <-- NUOVO: Cauzione versata
+                 {"ANTICIPO", "N",  6, 2}, ; // <-- NUOVO: Pagamento anticipato
+                 {"D_FINE",   "D",  8, 0}, ;
+                 {"O_FINE",   "C",  8, 0}, ;
+                 {"TOTALE",   "N",  7, 2}, ; // Costo effettivo del tempo
+                 {"SALDO",    "N",  7, 2} } // <-- NUOVO: Importo finale da pagare/rimborsare
+      DbCreate("noleggi.dbf", aNole)
    ENDIF
-   // Controllo e generazione indice Biciclette
-   IF !File("biciclette.cdx")
-      USE biciclette EXCLUSIVE
-      INDEX ON ID_BICI TAG id_bici         // Indice primario per ID
-      INDEX ON STATO   TAG stato           // Per filtrare bici disponibili
-      USE
-   ENDIF
+
 
    // 2. ARCHIVIO CLIENTI
    IF !File("clienti.dbf")
