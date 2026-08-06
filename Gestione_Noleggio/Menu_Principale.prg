@@ -161,6 +161,86 @@ RETURN
    @ 7, 2 SAY "File '" + cFileCSV + "' salvato sul disco."
    InKey(2)
 RETURN
- 
+ PROCEDURE RientroNoleggio()
+   LOCAL nIdBici := 0, nTotaleOre := 0, nImportoTempo := 0, nSaldoFinale := 0
+   LOCAL nDiffSecondi := 0
+   LOCAL nTariffaBici := 0
+   
+   CLS
+   @ 2, 2 SAY "=== RIENTRO BICICLETTA E CONTEGGIO CASSA ==="
+   @ 4, 2 SAY "Inserisci ID Bici rientrata: " GET nIdBici PICTURE "9999"
+   READ
+   
+   IF LastKey() == 27 ; RETURN ; ENDIF
+   
+   // Trova il noleggio attivo usando l'apposito indice per ID Bici
+   USE noleggi EXCLUSIVE NEW VIA "DBFCDX" SET ORDER TO TAG id_bici
+   SEEK nIdBici
+   
+   // Scorre nel caso ci fossero vecchi noleggi chiusi per quella bici, cerca quello attivo (senza data fine)
+   DO WHILE FOUND() .AND. !Empty(D_FINE)
+      CONTINUE
+   ENDDO
+   
+   IF !FOUND() .OR. !Empty(D_FINE)
+      @ 6, 2 SAY "Nessun noleggio attivo trovato per questa bicicletta."
+      USE; InKey(2); RETURN
+   ENDIF
+   
+   // Chiude temporaneamente i tempi
+   REPLACE D_FINE WITH Date()
+   REPLACE O_FINE WITH Time()
+   
+   // Calcolo ore totali trascorse
+   nDiffSecondi := (D_FINE - D_INIZIO) * 86400 + ( ElapSec( O_INIZIO, O_FINE ) )
+   nTotaleOre   := nDiffSecondi / 3600
+   IF nTotaleOre < 0.25 
+      nTotaleOre := 0.25 
+   ENDIF
+
+   // Recupera la tariffa oraria della bici
+   USE biciclette EXCLUSIVE NEW VIA "DBFCDX" SET ORDER TO TAG id_bici
+   SEEK nIdBici
+   IF FOUND()
+      nTariffaBici := TARIFFA
+      REPLACE STATO WITH "D" // Libera la bici
+   ENDIF
+   USE
+   
+   // Torna sul record del noleggio per salvare i calcoli economici finali
+   SELECT noleggi
+   nImportoTempo := nTotaleOre * nTariffaBici
+   
+   // Calcolo del Saldo Finale al netto dell'anticipo già versato alla partenza
+   nSaldoFinale  := nImportoTempo - ANTICIPO
+   
+   REPLACE TOTALE WITH nImportoTempo
+   REPLACE SALDO  WITH nSaldoFinale
+   
+   // Visualizzazione della ricevuta di chiusura
+   CLS
+   @ 2,  2 SAY "=== RICEVUTA CHIUSURA NOLEGGIO ==="
+   @ 4,  2 SAY "Tempo totale di utilizzo  : " + Transform(nTotaleOre, "99.9") + " ore"
+   @ 5,  2 SAY "Costo totale del servizio : EUR " + Transform(nImportoTempo, "9,999.00")
+   @ 6,  2 SAY "--------------------------------------------------"
+   @ 7,  2 SAY "Anticipo gia' versato     : EUR " + Transform(ANTICIPO, "9,999.00")
+   
+   IF nSaldoFinale > 0
+      @ 9,  2 SAY "DA INCASSARE DAL CLIENTE  : EUR " + Transform(nSaldoFinale, "9,999.00")
+   ELSEIF nSaldoFinale < 0
+      @ 9,  2 SAY "DA RIMBORSARE AL CLIENTE  : EUR " + Transform(Abs(nSaldoFinale), "9,999.00")
+   ELSE
+      @ 9,  2 SAY "SALDO CORRETTO            : EUR 0.00 (Nessun pagamento dovuto)"
+   ENDIF
+   
+   @ 11, 2 SAY "--------------------------------------------------"
+   @ 12, 2 SAY "[!] DA RESTITUIRE ADESSO   : CAUZIONE DI EUR " + Transform(CAUZIONE, "999.00")
+   @ 13, 2 SAY "--------------------------------------------------"
+   
+   USE // Chiude e salva noleggi
+   @ MaxRow(), 2 SAY "Premi un tasto per confermare la transazione..."
+   InKey(0)
+RETURN
+
 
 
