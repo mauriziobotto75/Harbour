@@ -191,3 +191,8 @@ PROCEDURE RientroNoleggio()
    
    InKey(0)
 RETURN
+// Funzione ausiliaria per calcolare i secondi tra due orari (formato HH:MM:SS)
+STATIC FUNCTION ElapSec( cTimeStart, cTimeEnd )
+   LOCAL nSecStart := Val(SubStr(cTimeStart,1,2))*3600 + Val(SubStr(cTimeStart,4,2))*60 + Val(SubStr(cTimeStart,7,2))
+   LOCAL nSecEnd   := Val(SubStr(cTimeEnd,1,2))*3600   + Val(SubStr(cTimeEnd,4,2))*60   + Val(SubStr(cTimeEnd,7,2))
+RETURN nSecEnd - nSecStart
