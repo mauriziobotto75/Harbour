@@ -130,11 +130,12 @@ PROCEDURE GestioneClienti()
 RETURN
 
 // Registrazione della partenza del noleggio
-  PROCEDURE AvviaNoleggio()
+   PROCEDURE AvviaNoleggio()
    LOCAL nIdBici := 0, nIdClie := 0, nNuovoId := 1
-   LOCAL nCauzione := 0.00, nAnticipo := 0.00, nOreMax := 5 // Default 5 ore max
+   LOCAL nCauzione := 0.00, nAnticipo := 0.00, nOreMax := 5
+   LOCAL cChiaveCerca := "", lHaPrenotazione := .F.
    CLS
-   @ 2, 2 SAY "=== AVVIA NUOVO NOLEGGIO CON LIMITI DI TEMPO ==="
+   @ 2, 2 SAY "=== AVVIA NUOVO NOLEGGIO CON VERIFICA PRENOTAZIONI ==="
    @ 4, 2 SAY "Inserisci ID Bici      : " GET nIdBici PICTURE "9999"
    @ 5, 2 SAY "Inserisci ID Cliente   : " GET nIdClie PICTURE "9999"
    @ 6, 2 SAY "Limite Max Ore Concesse: " GET nOreMax PICTURE "99" RANGE 1, 99
@@ -144,6 +145,7 @@ RETURN
    
    IF LastKey() == 27 ; RETURN ; ENDIF
 
+   // 1. Controllo anagrafica cliente
    USE clienti SHARED NEW VIA "DBFCDX" SET ORDER TO TAG id_clie
    SEEK nIdClie
    IF !FOUND()
@@ -152,15 +154,39 @@ RETURN
    ENDIF
    USE
 
+   // 2. Controllo prenotazioni attive per OGGI su questa bicicletta
+   USE prenotazioni EXCLUSIVE NEW VIA "DBFCDX" SET ORDER TO TAG bici_data
+   cChiaveCerca := Str(nIdBici, 4) + DToS(Date())
+   SEEK cChiaveCerca
+   
+   IF FOUND() .AND. STATO_PR == "A"
+      IF ID_CLIE == nIdClie
+         lHaPrenotazione := .T. // È la prenotazione del cliente corrente, può procedere
+      ELSE
+         @ 11, 2 SAY "Errore: Questa bici e' riservata oggi per un'altra prenotazione!"
+         USE; InKey(2); RETURN
+      ENDIF
+   ENDIF
+
+   // 3. Controllo e blocco fisico della bicicletta
    USE biciclette EXCLUSIVE NEW VIA "DBFCDX" SET ORDER TO TAG id_bici
    SEEK nIdBici
    IF !FOUND() .OR. STATO != "D"
-      @ 11, 2 SAY "Errore: Bici non disponibile!"
+      @ 11, 2 SAY "Errore: Bici non disponibile o in manutenzione!"
+      SELECT prenotazioni; USE
       USE; InKey(2); RETURN
    ENDIF
    REPLACE STATO WITH "N"
    USE
 
+   // 4. Aggiorna lo stato della prenotazione se presente
+   IF lHaPrenotazione
+      SELECT prenotazioni
+      REPLACE STATO_PR WITH "E" // Evasa, trasformata in noleggio attivo
+   ENDIF
+   SELECT prenotazioni; USE
+
+   // 5. Registrazione finale del noleggio
    USE noleggi EXCLUSIVE NEW VIA "DBFCDX"
    IF LastRec() > 0
       GO BOTTOM
@@ -173,7 +199,7 @@ RETURN
            ID_CLIE  WITH nIdClie, ;
            D_INIZIO WITH Date(), ;
            O_INIZIO WITH Time(), ;
-           ORE_MAX  WITH nOreMax, ; // Salva il limite pattuito
+           ORE_MAX  WITH nOreMax, ;
            CAUZIONE WITH nCauzione, ;
            ANTICIPO WITH nAnticipo, ;
            TOTALE   WITH 0.00, ;
@@ -181,9 +207,10 @@ RETURN
            SALDO    WITH 0.00
    USE
    
-   @ 12, 2 SAY "Noleggio #" + LTrim(Str(nNuovoId)) + " avviato. Limite: " + Str(nOreMax,2) + " ore."
+   @ 12, 2 SAY "Noleggio #" + LTrim(Str(nNuovoId)) + " avviato con successo!"
    InKey(2)
 RETURN
+
 
 
 
