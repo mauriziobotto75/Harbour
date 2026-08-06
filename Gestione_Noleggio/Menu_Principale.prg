@@ -1,30 +1,29 @@
  PROCEDURE Main()
+ PROCEDURE MenuPrincipale()
    LOCAL nScelta := 0
-   RddSetDefault( "DBFCDX" )
-   SET DATE FORMAT TO "DD/MM/YYYY"
-   SET CENTURY ON
-   CLS
    
-   // Crea i file se non esistono
-   InizializzaDatabase()
-   
-   DO WHILE nScelta # 4
+   DO WHILE nScelta # 6
       CLS
       @ 2, 10 SAY "=== GESTIONE NOLEGGIO BICI AVANZATO ==="
-      @ 4, 12 SAY "1. Gestione Clienti (Anagrafica)"
-      @ 5, 12 SAY "2. Avvia Nuovo Noleggio"
-      @ 6, 12 SAY "3. Rientro Bici e Calcolo Totale"
-      @ 7, 12 SAY "4. Esci"
-      @ 9, 12 SAY "Scelta: " GET nScelta PICTURE "9" RANGE 1, 4
+      @ 4, 12 SAY "1. Gestione Clienti (Inserimento)"
+      @ 5, 12 SAY "2. Cerca Cliente (Testuale)"
+      @ 6, 12 SAY "3. Avvia Nuovo Noleggio"
+      @ 7, 12 SAY "4. Rientro Bici e Calcolo Totale"
+      @ 8, 12 SAY "5. Report Guadagni e Statistiche"
+      @ 9, 12 SAY "6. Esci"
+      @ 11, 12 SAY "Scelta: " GET nScelta PICTURE "9" RANGE 1, 6
       READ
       
       DO CASE
          CASE nScelta == 1 ; GestioneClienti()
-         CASE nScelta == 2 ; AvviaNoleggio()
-         CASE nScelta == 3 ; RientroNoleggio()
+         CASE nScelta == 2 ; CercaCliente()
+         CASE nScelta == 3 ; AvviaNoleggio()
+         CASE nScelta == 4 ; RientroNoleggio()
+         CASE nScelta == 5 ; ReportGuadagni()
       ENDCASE
    ENDDO
 RETURN
+
 
 PROCEDURE ListBici()
    CLS
