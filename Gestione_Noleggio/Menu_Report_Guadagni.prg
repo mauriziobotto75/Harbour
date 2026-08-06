@@ -64,3 +64,9 @@
 RETURN
 
 RETURN
+   CLOSE DATABASES
+   
+   @ 6, 2 SAY "Esportazione completata con successo!"
+   @ 7, 2 SAY "File creato nella cartella del programma."
+   InKey(2)
+RETURN
