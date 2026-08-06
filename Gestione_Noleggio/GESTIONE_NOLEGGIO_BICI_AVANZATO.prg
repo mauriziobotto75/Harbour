@@ -127,35 +127,40 @@ PROCEDURE GestioneClienti()
 RETURN
 
 // Registrazione della partenza del noleggio
-PROCEDURE AvviaNoleggio()
+ PROCEDURE AvviaNoleggio()
    LOCAL nIdBici := 0, nIdClie := 0, nNuovoId := 1
+   LOCAL nCauzione := 0.00, nAnticipo := 0.00
    CLS
-   @ 2, 2 SAY "=== AVVIA NUOVO NOLEGGIO ==="
-   @ 4, 2 SAY "Inserisci ID Bici   : " GET nIdBici PICTURE "9999"
-   @ 5, 2 SAY "Inserisci ID Cliente: " GET nIdClie PICTURE "9999"
+   @ 2, 2 SAY "=== AVVIA NUOVO NOLEGGIO CON DEPOSITO ==="
+   @ 4, 2 SAY "Inserisci ID Bici      : " GET nIdBici PICTURE "9999"
+   @ 5, 2 SAY "Inserisci ID Cliente   : " GET nIdClie PICTURE "9999"
+   @ 7, 2 SAY "Cauzione Richiesta EUR : " GET nCauzione PICTURE "999.00"
+   @ 8, 2 SAY "Pagamento Anticipato € : " GET nAnticipo PICTURE "999.00"
    READ
    
-   // Verifica Cliente
-   USE clienti SHARED NEW
-   LOCATE FOR ID_CLIE == nIdClie
+   IF LastKey() == 27 ; RETURN ; ENDIF
+
+   // Verifica Cliente con Indice
+   USE clienti SHARED NEW VIA "DBFCDX" SET ORDER TO TAG id_clie
+   SEEK nIdClie
    IF !FOUND()
-      @ 7, 2 SAY "Errore: Cliente non registrato in anagrafica!"
+      @ 10, 2 SAY "Errore: Cliente non registrato in anagrafica!"
       USE; InKey(2); RETURN
    ENDIF
    USE
 
-   // Verifica e blocca la Bici
-   USE biciclette EXCLUSIVE NEW
-   LOCATE FOR ID_BICI == nIdBici .AND. STATO == "D"
-   IF !FOUND()
-      @ 7, 2 SAY "Errore: Bici non disponibile o inesistente!"
+   // Verifica e blocca la Bici con Indice
+   USE biciclette EXCLUSIVE NEW VIA "DBFCDX" SET ORDER TO TAG id_bici
+   SEEK nIdBici
+   IF !FOUND() .OR. STATO != "D"
+      @ 10, 2 SAY "Errore: Bici non disponibile o inesistente!"
       USE; InKey(2); RETURN
    ENDIF
    REPLACE STATO WITH "N"
    USE
 
    // Registra il movimento di noleggio
-   USE noleggi EXCLUSIVE NEW
+   USE noleggi EXCLUSIVE NEW VIA "DBFCDX"
    IF LastRec() > 0
       GO BOTTOM
       nNuovoId := ID_NOLEG + 1
@@ -167,12 +172,17 @@ PROCEDURE AvviaNoleggio()
            ID_CLIE  WITH nIdClie, ;
            D_INIZIO WITH Date(), ;
            O_INIZIO WITH Time(), ;
-           TOTALE   WITH 0.00
+           CAUZIONE WITH nCauzione, ;
+           ANTICIPO WITH nAnticipo, ;
+           TOTALE   WITH 0.00, ;
+           SALDO    WITH 0.00
    USE
    
-   @ 8, 2 SAY "Noleggio #" + LTrim(Str(nNuovoId)) + " avviato con successo!"
-   InKey(2)
+   @ 11, 2 SAY "Noleggio #" + LTrim(Str(nNuovoId)) + " avviato con successo!"
+   @ 12, 2 SAY "Incassare subito totale di: EUR " + Transform(nCauzione + nAnticipo, "999.00")
+   InKey(3)
 RETURN
+
 
 // Rientro, calcolo del tempo e del totale dovuto
 PROCEDURE RientroNoleggio()
