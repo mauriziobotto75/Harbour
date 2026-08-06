@@ -1,53 +1,34 @@
  PROCEDURE Main()
  
-   PROCEDURE MenuPrincipale()
+    PROCEDURE MenuPrincipale()
    LOCAL nScelta := 0
    
-   DO WHILE nScelta # 7
+   DO WHILE nScelta # 10
       CLS
-      @ 2, 10 SAY "=== GESTIONE NOLEGGIO BICI AVANZATO ==="
-      @ 4, 12 SAY "1. Gestione Clienti (Inserimento)"
-      @ 5, 12 SAY "2. Cerca Cliente (Testuale)"
-      @ 6, 12 SAY "3. Avvia Nuovo Noleggio"
-      @ 7, 12 SAY "4. Rientro Bici e Calcolo Totale"
-      @ 8, 12 SAY "5. Report Guadagni con Filtro Date"
-      @ 9, 12 SAY "6. Esporta Noleggi in File di Testo (.txt)"
-      @10, 12 SAY "7. Esporta file in formato CSV"
-      @ 10, 12 SAY "8. Esci"
-      @ 12, 12 SAY "Scelta: " GET nScelta PICTURE "9" RANGE 1, 8
+      @ 1, 10 SAY "=== GESTIONE NOLEGGIO BICI COMPLETO ==="
+      @ 3, 12 SAY "1. Gestione Clienti (Inserimento)"
+      @ 4, 12 SAY "2. Cerca Cliente (Testuale)"
+      @ 5, 12 SAY "3. Registra Prenotazione Futura"
+      @ 6, 12 SAY "4. Avvia Nuovo Noleggio (e controllo prenotazioni)"
+      @ 7, 12 SAY "5. Rientro Bici (Ispezione danni e calcolo saldo)"
+      @ 8, 12 SAY "6. Officina: Sblocco Bici da Manutenzione"
+      @ 9, 12 SAY "7. Report Guadagni con Filtro Date"
+      @ 10, 12 SAY "8. Esporta Report in formato Testo (.txt)"
+      @ 11, 12 SAY "9. Esporta Dati in formato Excel (.csv)"
+      @ 12, 12 SAY "10. Esci"
+      @ 14, 12 SAY "Scelta: " GET nScelta PICTURE "99" RANGE 1, 10
       READ
       
       DO CASE
-         CASE nScelta == 1 ; GestioneClienti()
-         CASE nScelta == 2 ; CercaCliente()
-         CASE nScelta == 3 ; AvviaNoleggio()
-         CASE nScelta == 4 ; RientroNoleggio()
-         CASE nScelta == 5 ; ReportGuadagni()
-         CASE nScelta == 6 ; EsportaTesto()
-         CASE nScelta == 7 ; EsportaCSV();
-      ENDCASE
-   ENDDO
-RETURN
-LOCAL nScelta := 0
-   
-   DO WHILE nScelta # 6
-      CLS
-      @ 2, 10 SAY "=== GESTIONE NOLEGGIO BICI AVANZATO ==="
-      @ 4, 12 SAY "1. Gestione Clienti (Inserimento)"
-      @ 5, 12 SAY "2. Cerca Cliente (Testuale)"
-      @ 6, 12 SAY "3. Avvia Nuovo Noleggio"
-      @ 7, 12 SAY "4. Rientro Bici e Calcolo Totale"
-      @ 8, 12 SAY "5. Report Guadagni e Statistiche"
-      @ 9, 12 SAY "6. Esci"
-      @ 11, 12 SAY "Scelta: " GET nScelta PICTURE "9" RANGE 1, 6
-      READ
-      
-      DO CASE
-         CASE nScelta == 1 ; GestioneClienti()
-         CASE nScelta == 2 ; CercaCliente()
-         CASE nScelta == 3 ; AvviaNoleggio()
-         CASE nScelta == 4 ; RientroNoleggio()
-         CASE nScelta == 5 ; ReportGuadagni()
+         CASE nScelta == 1  ; GestioneClienti()
+         CASE nScelta == 2  ; CercaCliente()
+         CASE nScelta == 3  ; InserisciPrenotazione()
+         CASE nScelta == 4  ; AvviaNoleggio()
+         CASE nScelta == 5  ; RientroNoleggio()
+         CASE nScelta == 6  ; RipristinaBiciManutenzione()
+         CASE nScelta == 7  ; ReportGuadagni()
+         CASE nScelta == 8  ; EsportaTesto()
+         CASE nScelta == 9  ; EsportaCSV()
       ENDCASE
    ENDDO
 RETURN
