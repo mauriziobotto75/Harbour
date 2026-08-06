@@ -8,25 +8,63 @@ PROCEDURE Main()
    CLS
    
    // Crea i file se non esistono
-   InizializzaDatabase()
+  PROCEDURE InizializzaDatabase()
+   LOCAL aBici, aClie, aNole
    
-   DO WHILE nScelta # 4
-      CLS
-      @ 2, 10 SAY "=== GESTIONE NOLEGGIO BICI AVANZATO ==="
-      @ 4, 12 SAY "1. Gestione Clienti (Anagrafica)"
-      @ 5, 12 SAY "2. Avvia Nuovo Noleggio"
-      @ 6, 12 SAY "3. Rientro Bici e Calcolo Totale"
-      @ 7, 12 SAY "4. Esci"
-      @ 9, 12 SAY "Scelta: " GET nScelta PICTURE "9" RANGE 1, 4
-      READ
-      
-      DO CASE
-         CASE nScelta == 1 ; GestioneClienti()
-         CASE nScelta == 2 ; AvviaNoleggio()
-         CASE nScelta == 3 ; RientroNoleggio()
-      ENDCASE
-   ENDDO
+   // 1. ARCHIVIO BICICLETTE
+   IF !File("biciclette.dbf")
+      aBici := { {"ID_BICI",  "N",  4, 0}, ;
+                 {"MODELLO",  "C", 30, 0}, ;
+                 {"STATO",    "C",  1, 0}, ;
+                 {"TARIFFA",  "N",  6, 2} }
+      DbCreate("biciclette.dbf", aBici)
+   ENDIF
+   // Controllo e generazione indice Biciclette
+   IF !File("biciclette.cdx")
+      USE biciclette EXCLUSIVE
+      INDEX ON ID_BICI TAG id_bici         // Indice primario per ID
+      INDEX ON STATO   TAG stato           // Per filtrare bici disponibili
+      USE
+   ENDIF
+
+   // 2. ARCHIVIO CLIENTI
+   IF !File("clienti.dbf")
+      aClie := { {"ID_CLIE",  "N",  4, 0}, ;
+                 {"NOME",     "C", 40, 0}, ;
+                 {"TELEFONO", "C", 15, 0}, ;
+                 {"DOC_ID",   "C", 15, 0} }
+      DbCreate("clienti.dbf", aClie)
+   ENDIF
+   // Controllo e generazione indice Clienti
+   IF !File("clienti.cdx")
+      USE clienti EXCLUSIVE
+      INDEX ON ID_CLIE TAG id_clie         // Ricerca rapida per ID
+      INDEX ON NOME    TAG nome            // Ottimizza le ricerche alfabetiche
+      USE
+   ENDIF
+
+   // 3. ARCHIVIO NOLEGGI
+   IF !File("noleggi.dbf")
+      aNole := { {"ID_NOLEG", "N",  6, 0}, ;
+                 {"ID_BICI",  "N",  4, 0}, ;
+                 {"ID_CLIE",  "N",  4, 0}, ;
+                 {"D_INIZIO", "D",  8, 0}, ;
+                 {"O_INIZIO", "C",  8, 0}, ;
+                 {"D_FINE",   "D",  8, 0}, ;
+                 {"O_FINE",   "C",  8, 0}, ;
+                 {"TOTALE",   "N",  7, 2} }
+      DbCreate("noleggi.dbf", aNole)
+   ENDIF
+   // Controllo e generazione indice Noleggi
+   IF !File("noleggi.cdx")
+      USE noleggi EXCLUSIVE
+      INDEX ON ID_NOLEG  TAG id_noleg      // ID Noleggio
+      INDEX ON ID_BICI   TAG id_bici       // Trova i noleggi di una bici
+      INDEX ON D_INIZIO  TAG d_inizio      // Ordinamento cronologico
+      USE
+   ENDIF
 RETURN
+
 
 // Creazione automatica dei file DBF necessari
 PROCEDURE InizializzaDatabase()
