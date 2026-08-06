@@ -11,20 +11,23 @@ PROCEDURE Main()
   PROCEDURE InizializzaDatabase()
    LOCAL aBici, aClie, aNole
    
-    IF !File("noleggi.dbf")
+     IF !File("noleggi.dbf")
       aNole := { {"ID_NOLEG", "N",  6, 0}, ;
                  {"ID_BICI",  "N",  4, 0}, ;
                  {"ID_CLIE",  "N",  4, 0}, ;
                  {"D_INIZIO", "D",  8, 0}, ;
                  {"O_INIZIO", "C",  8, 0}, ;
-                 {"CAUZIONE", "N",  6, 2}, ; // <-- NUOVO: Cauzione versata
-                 {"ANTICIPO", "N",  6, 2}, ; // <-- NUOVO: Pagamento anticipato
+                 {"ORE_MAX",  "N",  3, 0}, ; // <-- NUOVO: Limite massimo ore concordate
+                 {"CAUZIONE", "N",  6, 2}, ;
+                 {"ANTICIPO", "N",  6, 2}, ;
                  {"D_FINE",   "D",  8, 0}, ;
                  {"O_FINE",   "C",  8, 0}, ;
-                 {"TOTALE",   "N",  7, 2}, ; // Costo effettivo del tempo
-                 {"SALDO",    "N",  7, 2} } // <-- NUOVO: Importo finale da pagare/rimborsare
+                 {"TOTALE",   "N",  7, 2}, ; // Costo effettivo tempo standard
+                 {"PENALE",   "N",  6, 2}, ; // <-- NUOVO: Importo penale per ritardo
+                 {"SALDO",    "N",  7, 2} }
       DbCreate("noleggi.dbf", aNole)
    ENDIF
+
 
 
    // 2. ARCHIVIO CLIENTI
