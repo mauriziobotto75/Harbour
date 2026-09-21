@@ -12,6 +12,10 @@ namespace NormaLavoro.WinForms.Data
         public VideoRepository(NormaLavoroContext ctx) => _ctx = ctx;
 n        public Task<List<Video>> GetAllAsync() =>
             _ctx.Videos.AsNoTracking().OrderByDescending(v => v.UploadedAt).ToListAsync();
-n        public Task<Video?> GetByIdAsync(int id) => _ctx.Videos.FindAsync(id).AsTask();
+n        public async Task<Video> GetByIdAsync(int id)
+        {
+            var v = await _ctx.Videos.FindAsync(id);
+            return v!;
+        }
     }
 }

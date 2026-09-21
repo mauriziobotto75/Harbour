@@ -11,7 +11,7 @@ namespace NormaLavoro.WinForms
     public partial class MainForm : Form
     {
         private readonly VideoRepository _repo;
-        public BindingList<Video> Videos { get; } = new();
+        public BindingList<Video> Videos { get; } = new BindingList<Video>();
 n        public MainForm(VideoRepository repo)
         {
             InitializeComponent();
@@ -21,8 +21,8 @@ namespace NormaLavoro.WinForms
             listViewVideos.Columns.Add("Title", 300);
             listViewVideos.Columns.Add("FilePath", 400);
             listViewVideos.DoubleClick += ListViewVideos_DoubleClick;
-            btnRefresh.Click += async (_, __) => await LoadAsync();
-            btnPlay.Click += (_, __) => PlaySelected();
+            btnRefresh.Click += async (s, e) => await LoadAsync();
+            btnPlay.Click += (s, e) => PlaySelected();
         }
 n        protected override async void OnLoad(EventArgs e)
         {
@@ -45,7 +45,8 @@ namespace NormaLavoro.WinForms
 n        private void PlaySelected()
         {
             if (listViewVideos.SelectedItems.Count == 0) return;
-            var v = (Video)listViewVideos.SelectedItems[0].Tag!;
+            var v = listViewVideos.SelectedItems[0].Tag as Video;
+            if (v == null) return;
             if (System.IO.File.Exists(v.FilePath))
             {
                 try
@@ -62,6 +63,6 @@ namespace NormaLavoro.WinForms
                 MessageBox.Show("File non trovato: " + v.FilePath);
             }
         }
-n        private void ListViewVideos_DoubleClick(object? sender, EventArgs e) => PlaySelected();
+n        private void ListViewVideos_DoubleClick(object sender, EventArgs e) { PlaySelected(); }
     }
 }

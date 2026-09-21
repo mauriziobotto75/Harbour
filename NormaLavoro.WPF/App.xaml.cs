@@ -12,7 +12,8 @@ namespace NormaLavoro
             var options = new DbContextOptionsBuilder<NormaLavoroContext>()
                 .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=NormaLavoro;Trusted_Connection=True;")
                 .Options;
-n            var ctx = new NormaLavoroContext(options);
+
+            var ctx = new NormaLavoroContext(options);
             var main = new Views.MainWindow(ctx);
             main.Show();
         }
